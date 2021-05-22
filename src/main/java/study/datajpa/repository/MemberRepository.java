@@ -8,6 +8,7 @@ import study.datajpa.domain.entity.Member;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findByUsernameAndAgeGreaterThan(String username, int age); //실무에서 간단한 정적쿼리를 해결할 때 사용
@@ -26,4 +27,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("select m from Member m where m.username in :names")
     List<Member> findByNames(@Param("names") Collection<String> names);
+
+    List<Member> findListByUsername(String username); //컬렉션
+
+    Member findMemberByUsername(String username); //단건
+
+    Optional<Member> findOptionalByUsername(String username); //단건 Optional
 }

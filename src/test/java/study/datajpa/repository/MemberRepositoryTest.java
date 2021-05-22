@@ -2,6 +2,7 @@ package study.datajpa.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,7 @@ import study.datajpa.domain.entity.Team;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -137,5 +139,20 @@ public class MemberRepositoryTest {
         for (Member member : result) {
             System.out.println("member = " + member);
         }
+    }
+
+    @Test
+    public void returnType() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("BBB", 20);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+        List<Member> result = memberRepository.findListByUsername("AAA"); //데이터가 없을 시 empty 컬렉션을 반환함
+        System.out.println("result = " + result);
+        Member findMember = memberRepository.findMemberByUsername("AAA"); //데이터가 없을 시 결과가 null 반환 됨
+        System.out.println("findMember = " + findMember);
+        Optional<Member> optionalResult = memberRepository.findOptionalByUsername("AAA"); //데이터가 있을 수도있고 없을 수도 있으면 Optional을 쓰자
+        System.out.println("optionalResult.get() = " + optionalResult.get());
     }
 }
