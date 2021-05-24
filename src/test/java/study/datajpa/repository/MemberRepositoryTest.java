@@ -4,6 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.domain.dto.MemberDto;
@@ -154,5 +158,44 @@ public class MemberRepositoryTest {
         System.out.println("findMember = " + findMember);
         Optional<Member> optionalResult = memberRepository.findOptionalByUsername("AAA"); //데이터가 있을 수도있고 없을 수도 있으면 Optional을 쓰자
         System.out.println("optionalResult.get() = " + optionalResult.get());
+    }
+
+    @Test
+    public void paging() {
+        //given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
+
+        int age = 10;
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username")); //page는 1부터가 아니라 0부터 시작이다.
+
+        //when
+        Page<Member> page = memberRepository.findByAge(age, pageRequest); //total카운트 쿼리까지 같이 날려준다
+//        Slice<Member> page = memberRepository.findByAge(age, pageRequest); //total카운트 쿼리는 같이 날려주지 않지만  limit이 3개 이지만 한개더 가져와서 다음페이지가 있나보다 인지 한 다음 더보기를 누르거나 다음걸 미리 로딩해놓는다거나 api설계를 할 수 있음(type만 Slice로 바꾸면 가능!)
+//        List<Member> page = memberRepository.findByAge(age, pageRequest); //다른 메서드들이 필요하지 않다면 List로 가져와도 된다 (정확히 원하는 값만 딱딱 끊어서 가져올 때)
+
+        //보통 DB에선 totalCount쿼리가 성능을 대부분 다 잡아먹는다.
+
+        //엔티티는 절대 외부로 노출시키면 안된다 DTO로 변환해서 반환하자
+        Page<MemberDto> toMap = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
+        //여기서 toMap은 api로 반환을 해도 된다
+
+        //then
+        List<Member> content = page.getContent();
+        long totalElements = page.getTotalElements();
+        for (Member member : content) {
+            System.out.println("member = " + member);
+        }
+        System.out.println("totalElements = " + totalElements);
+
+        assertThat(content.size()).isEqualTo(3);
+        assertThat(page.getTotalElements()).isEqualTo(5);
+        assertThat(page.getNumber()).isEqualTo(0);
+        assertThat(page.getTotalPages()).isEqualTo(2);
+        assertThat(page.isFirst()).isTrue();
+        assertThat(page.hasNext()).isTrue();
     }
 }
