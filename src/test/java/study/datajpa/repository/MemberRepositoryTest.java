@@ -14,6 +14,8 @@ import study.datajpa.domain.dto.MemberDto;
 import study.datajpa.domain.entity.Member;
 import study.datajpa.domain.entity.Team;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +29,8 @@ public class MemberRepositoryTest {
 
     @Autowired MemberRepository memberRepository;
     @Autowired TeamRepository teamRepository;
+    @PersistenceContext
+    EntityManager em;
 
     @Test
     public void testMember() {
@@ -197,5 +201,29 @@ public class MemberRepositoryTest {
         assertThat(page.getTotalPages()).isEqualTo(2);
         assertThat(page.isFirst()).isTrue();
         assertThat(page.hasNext()).isTrue();
+    }
+
+    @Test
+    public void bulkUpdate() {
+        //given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 19));
+        memberRepository.save(new Member("member3", 20));
+        memberRepository.save(new Member("member4", 21));
+        memberRepository.save(new Member("member5", 40));
+
+        //when
+        int resultCount = memberRepository.bulkAgePlus(20); //20살이거나 그 이상인 사람들은 +1  (현재상태에서 대상은3개)
+        //벌크연산은 영속성 컨텍스트와 1차캐시를 상관하지 않고 바로 DB에 반영한다
+
+//        em.clear();  //벌크 연산 후 이 작업들을 하지 않으면 영속성컨텍스트 1차캐시에 있는 벌크연산이 반영되지않은 데이터를 가져오게 된다
+        //이 작업은 Spring Data JPA에서 대신 해준다 @Modifying옵션 클리어오토매틱컬.
+
+        List<Member> result = memberRepository.findByUsername("member5");
+        Member member = result.get(0);
+        System.out.println("member = " + member);
+
+        //then
+        assertThat(resultCount).isEqualTo(3);
     }
 }

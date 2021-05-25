@@ -3,6 +3,7 @@ package study.datajpa.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.domain.entity.Member;
 
@@ -12,7 +13,7 @@ import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 @Transactional //까먹지 말기
-//@Rollback(value = false)
+@Rollback(value = false)
 class MemberJpaRepositoryTest {
 
     @Autowired
@@ -110,5 +111,21 @@ class MemberJpaRepositoryTest {
         //then
         assertThat(members.size()).isEqualTo(3);
         assertThat(totalCount).isEqualTo(5);
+    }
+
+    @Test
+    public void bulkUpdate() {
+        //given
+        memberJpaRepository.save(new Member("member1", 10));
+        memberJpaRepository.save(new Member("member2", 19));
+        memberJpaRepository.save(new Member("member3", 20));
+        memberJpaRepository.save(new Member("member4", 21));
+        memberJpaRepository.save(new Member("member5", 40));
+
+        //when
+        int resultCount = memberJpaRepository.bulkAgePlus(20); //20살이거나 그 이상인 사람들은 +1  (현재상태에서 대상은3개)
+
+        //then
+        assertThat(resultCount).isEqualTo(3);
     }
 }
