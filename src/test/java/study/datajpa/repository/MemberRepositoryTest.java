@@ -184,10 +184,10 @@ public class MemberRepositoryTest {
         //보통 DB에선 totalCount쿼리가 성능을 대부분 다 잡아먹는다.
 
         //엔티티는 절대 외부로 노출시키면 안된다 DTO로 변환해서 반환하자
-        Page<MemberDto> toMap = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
-        //여기서 toMap은 api로 반환을 해도 된다
-
-        //then
+//        Page<MemberDto> toMap = page.map(member -> new MemberDto(member.getId(), member.getUsername(), null));
+//        //여기서 toMap은 api로 반환을 해도 된다
+//
+//        //then
         List<Member> content = page.getContent();
         long totalElements = page.getTotalElements();
         for (Member member : content) {
@@ -213,7 +213,7 @@ public class MemberRepositoryTest {
         memberRepository.save(new Member("member5", 40));
 
         //when
-        int resultCount = memberRepository.bulkAgePlus(20); //20살이거나 그 이상인 사람들은 +1  (현재상태에서 대상은3개)
+//        int resultCount = memberRepository.bulkAgePlus(20); //20살이거나 그 이상인 사람들은 +1  (현재상태에서 대상은3개)
         //벌크연산은 영속성 컨텍스트와 1차캐시를 상관하지 않고 바로 DB에 반영한다
 
 //        em.clear();  //벌크 연산 후 이 작업들을 하지 않으면 영속성컨텍스트 1차캐시에 있는 벌크연산이 반영되지않은 데이터를 가져오게 된다
@@ -224,6 +224,37 @@ public class MemberRepositoryTest {
         System.out.println("member = " + member);
 
         //then
-        assertThat(resultCount).isEqualTo(3);
+//        assertThat(resultCount).isEqualTo(3);
+    }
+
+    @Test
+    public void findMemberLazy() {
+        //given
+        //member1 -> teamA
+        //member2 -> teamB
+
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 10, teamB);
+
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        em.flush();
+        em.clear();
+
+        //when N + 1
+        //select Member 1
+        List<Member> members = memberRepository.findAll();
+        for (Member member : members) {
+            System.out.println("member = " + member.getUsername());
+            System.out.println("member.teamClass = " + member.getTeam().getClass());
+            System.out.println("member.team() = " + member.getTeam().getName());
+        }
     }
 }
