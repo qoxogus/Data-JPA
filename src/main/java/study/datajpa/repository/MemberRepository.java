@@ -3,14 +3,13 @@ package study.datajpa.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import study.datajpa.domain.dto.MemberDto;
 import study.datajpa.domain.entity.Member;
 
+import javax.persistence.LockModeType;
+import javax.persistence.QueryHint;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -61,4 +60,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 //    @EntityGraph(attributePaths = {"team"})
     @EntityGraph("Member.all") //named엔티티그래프
     List<Member> findEntityGraphByUsername(@Param("username") String username); //메소드 이름으로 쿼리 생성에서 fetch join
+
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+    Member findReadOnlyByUsername(String username);
+
+    //select for update (비관적인 lock) select 할 때 다른 애들 손대지 마! 하고 lock을 건다
+    @Lock(LockModeType.PESSIMISTIC_WRITE) //실시간 트래픽이 많은 서비스는 Lock을 사용하지 말자 
+    List<Member> findLockByUsername(String username);
 }

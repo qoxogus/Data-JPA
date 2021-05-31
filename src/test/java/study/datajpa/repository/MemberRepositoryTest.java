@@ -257,4 +257,42 @@ public class MemberRepositoryTest {
             System.out.println("member.team() = " + member.getTeam().getName());
         }
     }
+
+    @Test
+    public void queryHint() {
+        //given
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+
+        em.flush(); //쿼리 나감
+        em.clear(); //영속성 컨텍스트 클리어
+
+        //when
+//        Member findMember = memberRepository.findById(member1.getId()).get();
+//        findMember.setUsername("member2"); //dirty check  (update query)  member1 -> member2
+
+        //HiberNate에서 조회만 했을 때 성능 최적화 방법 (JPA표준에선 지원하지않음)
+        Member findMember = memberRepository.findReadOnlyByUsername("member1"); //성능 최적화를 해버리기때문에 스냅샷들이랑을 만들지 않음(readOnly이기 때문에 변경이 되지 않는다고 가정하고 전부 무시해버림)
+        findMember.setUsername("member2"); //update query문이 나가지 않는다
+
+        em.flush();
+
+        //then
+
+    }
+
+    @Test
+    public void lock() {
+        //given
+        Member member1 = new Member("member1", 10);
+        memberRepository.save(member1);
+
+        em.flush(); //쿼리 나감
+        em.clear(); //영속성 컨텍스트 클리어
+
+        //when
+        List<Member> result = memberRepository.findLockByUsername("member1");
+
+
+    }
 }
