@@ -61,10 +61,10 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @EntityGraph("Member.all") //named엔티티그래프
     List<Member> findEntityGraphByUsername(@Param("username") String username); //메소드 이름으로 쿼리 생성에서 fetch join
 
-    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true")) //hibernate readOnly
     Member findReadOnlyByUsername(String username);
 
     //select for update (비관적인 lock) select 할 때 다른 애들 손대지 마! 하고 lock을 건다
-    @Lock(LockModeType.PESSIMISTIC_WRITE) //실시간 트래픽이 많은 서비스는 Lock을 사용하지 말자 
+    @Lock(LockModeType.PESSIMISTIC_WRITE) //실시간 트래픽이 많은 서비스는 Lock을 사용하지 말자
     List<Member> findLockByUsername(String username);
 }
