@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
     List<Member> findByUsernameAndAgeGreaterThan(String username, int age); //실무에서 간단한 정적쿼리를 해결할 때 사용
 
 //    @Query(name = "Member.findByUsername") 생략가능  NamedQuery가 우선순위 1순위 이고 NamedQuery가 없다면 메소드 이름으로 쿼리가 생성된다
@@ -67,4 +67,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     //select for update (비관적인 lock) select 할 때 다른 애들 손대지 마! 하고 lock을 건다
     @Lock(LockModeType.PESSIMISTIC_WRITE) //실시간 트래픽이 많은 서비스는 Lock을 사용하지 말자
     List<Member> findLockByUsername(String username);
+
+    //핵심비즈니스로직 리파지토리와 화면에 맞게 반환해주는 DTO리파지토리랑 나눠주는것이 좋다
 }

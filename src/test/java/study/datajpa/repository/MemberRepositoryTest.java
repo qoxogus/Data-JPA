@@ -32,6 +32,8 @@ public class MemberRepositoryTest {
     @PersistenceContext
     EntityManager em;
 
+    @Autowired  MemberQueryRepository memberQueryRepository;
+
     @Test
     public void testMember() {
         Member member = new Member("memberA");
@@ -292,7 +294,11 @@ public class MemberRepositoryTest {
 
         //when
         List<Member> result = memberRepository.findLockByUsername("member1");
-
-
+    }
+    
+    @Test
+    public void callCustom() { //custom은 복잡해진쿼리들(QueryDSL로 해결한다)
+        List<Member> result = memberRepository.findMemberCustom();
+        
     }
 }
