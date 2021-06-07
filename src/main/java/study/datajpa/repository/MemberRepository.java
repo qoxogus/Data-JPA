@@ -6,6 +6,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import study.datajpa.domain.dto.MemberDto;
+import study.datajpa.domain.dto.UsernameOnlyDto;
 import study.datajpa.domain.entity.Member;
 
 import javax.persistence.LockModeType;
@@ -69,4 +70,6 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     List<Member> findLockByUsername(String username);
 
     //핵심비즈니스로직 리파지토리와 화면에 맞게 반환해주는 DTO리파지토리랑 나눠주는것이 좋다
+
+    <T> List<T> findProjectionsByUsername(@Param("username") String username, Class<T> type);
 }
