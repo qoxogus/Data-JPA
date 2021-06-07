@@ -37,7 +37,7 @@ public class MemberController {
         return page.map(MemberDto::new);
     }
 
-    @PostConstruct //스프링애플리케이션이 올라올때 이게 실행된다
+//    @PostConstruct //스프링애플리케이션이 올라올때 이게 실행된다
     public void init() {
 //        memberRepository.save(new Member("userA"));
         for (int i =0; i < 100; i++) {
